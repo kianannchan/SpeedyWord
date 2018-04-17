@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+
+<style>
+
+#demo{
+background: repeating-linear-gradient(
+  to left,
+  #f6ba52,
+  #f6ba52 10px,
+  #ffd180 10px,
+  #ffd180 20px
+
+);
+border-radius:0 0 10px 10px;
+text-align:center;
+border:2px orange solid;
+opacity:0.7;
+}
+body{
+background: repeating-linear-gradient(
+  -200deg,
+  #222,
+  #222 20px,
+  #333 1px,
+  #333 30px
+);
+}
+
+#currentword{
+
+	color:white; 
+	font-size:40pt;
+	font-weight:bold;
+
+}
+
+#guess, #statistic, #reset{
+
+	font-size:15pt;
+	padding:10px;
+
+}
+
+#reset:hover{
+
+	cursor:pointer;
+	font-weight:bold;
+
+}
+
+#guess{
+
+	background-color:black;
+	color:white;
+	opacity:0.5;
+	border:2px orange solid;
+	outline-width:0;
+}
+
+#demo{
+	padding:2%;
+}
+
+
+#statistic, #dic_canvas{
+
+	background-color:black;
+	color:white;
+	opacity:0.5;
+	border:2px orange solid;
+	font-weight:bold;
+
+}
+
+#dic_list{
+
+	width:100%; 
+	height:200px; 
+	font-size:15pt;
+
+}
+
+#input_holder, #currentword{
+
+	padding: 10px;
+	margin:auto;
+	text-align:center;
+
+}
+
+.abutton:hover, .bbutton:hover{
+	font-weight:bold;
+	cursor:pointer;
+
+}
+
+.abutton, .bbutton, .button{
+	width:70px; 
+	float:right; 
+	text-align:center;
+
+}
+
+
+.abutton{
+	font-weight:bold;
+}
+
+.header{
+
+	width:100%; 
+	text-align:right; 
+	display:block; 
+	position:fixed; 
+	opacity:0.7; 
+	top:0; 
+	left:0; 
+	height:20px; 
+	background-color:orange;
+
+}
+
+
+</style>
+
+<body onload="default_value();">
+
+<div class="header"> 
+	<div>
+		<div class="abutton">Game</div>
+	</div>
+	<div>
+		<div class="bbutton">Dictionary</div>
+	</div>
+</div>
+
+<div style="margin-top:20px;">
+	<div class="a" style="width:90%; margin:auto">
+		<div id="currentword">
+		</div>
+		
+		<div id = "input_holder">
+			<input autofocus id="guess"  type="input" onkeydown="if (event.keyCode == 13) check();">
+			<input type="button" id="reset" onclick="default_value();" value="reset">
+		</div>
+		<div id="statistic"></div>
+		<div id="demo"></div>
+	</div>
+
+<div class="b" style="display:none">
+
+	<div id="dic_canvas" style="margin-top:50px; padding:20px;">
+		<p>Input a word(s) into textarea & click save. The word(s) will be reflected in the Game right away!</p>
+		<textarea id="dic_list" name="test"></textarea><br>
+		<input type="submit" value="Save" id="dic_submit" onclick="insert();">
+	</div>
+
+</div>
+
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script>
+
+// Jquery for swapping between Tabs
+//Show Game, hide Settings & Instruction DIV
+$(document).ready(function(){
+    $(".abutton").click(function(){
+        $(".a").show(500);
+		$(".b").hide(500);	
+		$(".abutton").css("font-weight","bold");
+		$(".bbutton").css("font-weight","normal");
+		default_value();
+
+    });
+	
+	 $(".bbutton").click(function(){
+        $(".b").show(500);
+		$(".a").hide(500);	
+		$(".bbutton").css("font-weight","bold");
+		$(".abutton").css("font-weight","normal");		
+
+    });
+	});
+	
+
+
+	
+function default_value(){
+	count = 3000;
+	char_count = 0;
+	word_count = 0;
+	wrong_count = 0;
+	point_count = 0;
+	level = 1; 
+	Timer = 0;
+	word();
+}
+
+speed = 500;
+var loop_time = setInterval(myTimer ,speed);
+
+function myTimer() {
+
+	if (count <= 0){
+		if (count < 0){
+			count = 0;
+		}
+		document.getElementById("guess").readOnly = true;
+		document.getElementById("guess").value = "";
+	
+	}else{ 	
+		document.getElementById("guess").readOnly = false;
+		count -= (level); //level * 10
+		Timer +=1;
+		statistic_plot();
+
+
+
+}
+
+	document.getElementById('demo').style.width=(((count/3000) *100)- 5) + "%";
+    document.getElementById('demo').innerHTML=(parseFloat((count/3000) *100)).toFixed(2) + "%";
+
+}
+
+function check(){
+	var input = document.getElementById("guess").value;
+	if (input == guess_word){
+		char_count = char_count + guess_word.length;
+		word_count += 1;
+		point_count =  parseInt(char_count);
+		word();
+
+	}else{
+		count -= (guess_word.length * level); // 30
+		wrong_count += 1;
+
+	}
+
+	if (point_count >= (20 * level)){
+		level +=1;
+		count +=(level * 20);
+		if (count > 3000){
+			count = 3000;
+		}
+
+	}
+
+	document.getElementById("guess").value = '';
+	statistic_plot();
+}
+
+function word(){
+
+	load_array = localStorage.getItem("Array");
+
+	if (load_array){
+		load_array= load_array.split(",");
+		words = load_array;
+
+	}else{
+		words = ["cat", "dog", "pig", "sheep", "bear", "hippotamous", "jaguar"];
+		localStorage.setItem("Array", words);
+	}
+
+	document.getElementById('dic_list').value = words.join("\n");
+
+
+	random = Math.floor((Math.random() * (words.length) + 0));
+	guess_word = words[random];
+	mask_value = guess_word;
+
+	if (level > 10 && mask_value.length > 3){
+		random_char = Math.floor(Math.random()* (guess_word.length) + 0);
+		mask_value = mask_value.substr(0, random_char) + "_" + mask_value.substr(random_char + 1);
+
+	}
+	if (level > 20 && mask_value.length > 5) {
+		random_char = Math.floor(Math.random()* (guess_word.length) + 0);
+		mask_value = mask_value.substr(0, random_char) + "_" + mask_value.substr(random_char + 1);
+
+	}
+
+	document.getElementById("currentword").innerHTML = mask_value;
+
+	statistic_plot();
+}
+
+function statistic_plot(){
+
+	document.getElementById("statistic").innerHTML = 
+			"Level: " + level + "<br>Char: " + 
+			char_count + " (Req: " + (20*level) + ")<br>Word: " + word_count
+			+ "<br>Wrong: " + wrong_count + "<br>Accuracy: " + parseFloat(word_count/(word_count+wrong_count)*100).toFixed(2) + " %"
+			+ "<br>Run Time: " + (parseInt(Timer/2)) + "s";
+
+}
+
+function insert(){
+
+	var input_table = document.getElementById("dic_list").value;
+
+	if (input_table.length == 0){
+		alert("No Word how to play?? Default Word(s) will be load");
+		exit;
+	}
+
+	words = input_table.split("\n");
+	var dupli = 0;
+
+	for (outer = 0; outer < words.length; outer++){
+
+		for (inner = 0; inner < words.length; inner++){
+			if (words[outer] == words[inner] && !(inner == outer)){
+				dupli +=1;
+				words.splice(inner,1);
+		
+			}	
+		}
+	
+	}
+	
+	
+	if (dupli > 0){
+		alert("Duplicate Found: " + dupli);
+
+	}else{
+		localStorage.setItem("Array", words);
+		alert("Updated!");
+		word();
+
+	}
+}
+
+</script>
+
+</body>
+</html>
+                              		
