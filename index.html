@@ -154,6 +154,8 @@ background: repeating-linear-gradient(
 		<p>Input a word(s) into textarea & click save. The word(s) will be reflected in the Game right away!</p>
 		<textarea id="dic_list" name="test"></textarea><br>
 		<input type="submit" value="Save" id="dic_submit" onclick="insert();">
+		<input type="submit" value="Upload from website" id="dic_upload" onclick="upload_link();">
+
 	</div>
 
 </div>
@@ -333,6 +335,70 @@ function insert(){
 		word();
 
 	}
+}
+
+
+
+function upload_link(){
+	var url = prompt("Link: ");
+	
+	var re = /(^|\s)((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/gi;
+
+
+	if (url.length > 0 && re.test(url)){
+		// Route access website using proxy. Direct website blocked by access Control.
+		const proxyurl = "https://cors-anywhere.herokuapp.com/";
+		
+		// Prompt user Data Extaction Started
+		alert ("Data Extaction in progress. A complete dialog unpon completed. Please be patient");
+
+		$.get( proxyurl + url, function(data){
+		
+					alert(data);
+					// Parse unused Data
+					var output = data.replace(/[:=0123456789\'"-<>;?*!{}.,@+|()_^&#\/]/g, " ");
+					
+					// Split Data by space
+					var splitData = output.split(" ");
+					var new_output ="";
+					var tempList = [];
+					// Loop through splitted Data
+					for (var index =0; index < splitData.length; index++){
+							// Further refined unused data
+							var temp_current = splitData[index].replace("[","").replace("]","").replace(/^\s+|\s+$/g,"").trim().toLowerCase();
+							// Filter data that is length 4 and less than 10
+							if (temp_current.length > 4 && temp_current.length < 10){
+								// Check for duplication
+								if (tempList.indexOf(temp_current) <= 0 == true){   
+									// Add into List
+									tempList.push(temp_current);
+									// Append postive Data into String format with "\n"
+									if (new_output.length ==0){
+										new_output = temp_current + "\n";
+
+									}else{
+										new_output += temp_current + "\n";
+										
+									}
+								}
+							}
+					}
+					// Populate Positive Data in TextBox
+					document.getElementById("dic_list").value= new_output;
+					// Prompt user that data extraction completed
+					alert ("New content insert into the box.");
+
+		});
+		
+		
+		
+	// No url given or url is wrong format
+	}else{
+		alert("No link provided, nothing being inserted");
+	
+	}
+	
+	
 }
 
 </script>
